@@ -6,13 +6,32 @@ public class Day05 : AbstractDay
 	public override string Part1()
 	{
 		ParseInput(out var rules, out var updates);
-
 		return $"{updates.Where(t => CheckRules(t, rules)).Sum(t => t.Skip(t.Length / 2).First())}";
 	}
+
+	public override string Part2()
+	{
+		ParseInput(out var rules, out var updates);
+		return $"{updates.Where(t => !CheckRules(t, rules)).Select(t => FixWithRules(t, rules)).Sum(t => t.Skip(t.Length / 2).First())}";
+	}
+
 	private static bool CheckRules(int[] updatePages, Dictionary<int, HashSet<int>> rules) =>
 		!updatePages.Where((value, index) => rules.ContainsKey(value) && rules[value].Intersect(updatePages.Take(index)).Any()).Any();
 
-	public override string Part2() => "";
+	private static int[] FixWithRules(int[] updatePages, Dictionary<int, HashSet<int>> rules)
+	{
+		var ordered = new List<int>();
+		var remainingPages = new HashSet<int>(updatePages);
+
+		while (remainingPages.Count != 0)
+		{
+			var nextItem = remainingPages.First(t => !rules.Any(r => remainingPages.Contains(r.Key) && r.Value.Contains(t)));
+			remainingPages.Remove(nextItem);
+			ordered.Add(nextItem);
+		}
+
+		return ordered.ToArray();
+	}
 
 	private void ParseInput(out Dictionary<int, HashSet<int>> rules, out IReadOnlyList<int[]> updates)
 	{
