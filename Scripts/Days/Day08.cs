@@ -4,27 +4,50 @@ namespace AdventOfCode2024.Scripts.Days;
 
 public class Day08 : AbstractDay {
    protected override int Day => 8;
-   private readonly HashSet<Func<long, long, long>> part1Operators = [(a, b) => a + b, (a, b) => a * b];
-   private readonly HashSet<Func<long, long, long>> part2Operators = [(a, b) => long.Parse($"{a}{b}"), (a, b) => a + b, (a, b) => a * b];
 
    public override string Part1() {
       ParseInput(out var antennasPerCoordinates, out var dimensions);
-      var antiNodes = GetAllAntiNodeCoordinates(antennasPerCoordinates.Values.Distinct().ToDictionary(c => c, c => antennasPerCoordinates.Where(t => t.Value == c).Select(t => t.Key).ToHashSet()),
+      var antiNodes = GetPart1AntiNodeCoordinates(antennasPerCoordinates.Values.Distinct().ToDictionary(c => c, c => antennasPerCoordinates.Where(t => t.Value == c).Select(t => t.Key).ToHashSet()),
          dimensions);
       return $"{antiNodes.Count}";
    }
 
-   public override string Part2() => "";
+   public override string Part2() {
+      ParseInput(out var antennasPerCoordinates, out var dimensions);
+      var antiNodes = GetPart2AntiNodeCoordinates(antennasPerCoordinates.Values.Distinct().ToDictionary(c => c, c => antennasPerCoordinates.Where(t => t.Value == c).Select(t => t.Key).ToHashSet()),
+         dimensions);
+      return $"{antiNodes.Count}";
+   }
 
-   private static HashSet<Vector2Int> GetAllAntiNodeCoordinates(Dictionary<char, HashSet<Vector2Int>> allCoordinatesPerAntennaType, Vector2Int dimensions) {
+   private static HashSet<Vector2Int> GetPart1AntiNodeCoordinates(Dictionary<char, HashSet<Vector2Int>> allCoordinatesPerAntennaType, Vector2Int dimensions) {
       return (from antennaGroup in allCoordinatesPerAntennaType
               from firstAntennaCoords in antennaGroup.Value
               from secondAntennaCoords in antennaGroup.Value.Except([firstAntennaCoords])
               select 2 * secondAntennaCoords - firstAntennaCoords
               into antiNodeCoords
-              where antiNodeCoords.X >= 0 && antiNodeCoords.X < dimensions.X && antiNodeCoords.Y >= 0 && antiNodeCoords.Y < dimensions.Y
+              where IsInGrid(antiNodeCoords, dimensions)
               select antiNodeCoords).ToHashSet();
    }
+
+   private static HashSet<Vector2Int> GetPart2AntiNodeCoordinates(Dictionary<char, HashSet<Vector2Int>> allCoordinatesPerAntennaType, Vector2Int dimensions) {
+      var antiNodeLines = from antennaGroup in allCoordinatesPerAntennaType
+                          from firstAntennaCoords in antennaGroup.Value
+                          from secondAntennaCoords in antennaGroup.Value.Except([firstAntennaCoords])
+                          select (origin: firstAntennaCoords, delta: secondAntennaCoords - firstAntennaCoords);
+
+      var result = new HashSet<Vector2Int>();
+      foreach (var antiNodeLine in antiNodeLines) {
+         var antiNodeCoords = antiNodeLine.origin + antiNodeLine.delta;
+         while (IsInGrid(antiNodeCoords, dimensions)) {
+            result.Add(antiNodeCoords);
+            antiNodeCoords += antiNodeLine.delta;
+         }
+      }
+
+      return result;
+   }
+
+   private static bool IsInGrid(Vector2Int coordinates, Vector2Int dimensions) => coordinates.X >= 0 && coordinates.X < dimensions.X && coordinates.Y >= 0 && coordinates.Y < dimensions.Y;
 
    private void ParseInput(out Dictionary<Vector2Int, char> antennasPerCoordinates, out Vector2Int dimensions) {
       var validLines = GetInputLines().Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
