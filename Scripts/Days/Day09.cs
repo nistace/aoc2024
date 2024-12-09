@@ -4,9 +4,7 @@ public class Day09 : AbstractDay {
    protected override int Day => 9;
 
    public override string Part1() {
-      var input = GetInputText().Trim().Select((t, i) => (length: int.Parse($"{t}"), position: i)).ToArray();
-      var blocks = input.Where(t => t.position % 2 == 0).Select(t => (t.length, id: t.position / 2)).ToArray();
-      var gaps = input.Where(t => t.position % 2 == 1).Select(t => t.length).ToArray();
+      ParseInput(out var blocks, out var gaps);
 
       var checksum = 0L;
       var blockIndexToMove = blocks.Length - 1;
@@ -36,5 +34,49 @@ public class Day09 : AbstractDay {
       return $"{checksum}";
    }
 
-   public override string Part2() => "";
+   public override string Part2() {
+      ParseInput(out var blocks, out var gaps);
+
+      var checksum = 0L;
+      var movedBlocks = new bool[blocks.Length];
+      var currentPosition = 0;
+      for (var index = 0; index < blocks.Length; ++index) {
+         if (movedBlocks[blocks[index].id]) {
+            currentPosition += blocks[index].length;
+         }
+         else {
+            for (var blockItemIndex = 0; blockItemIndex < blocks[index].length; ++blockItemIndex) {
+               checksum += currentPosition * blocks[index].id;
+               currentPosition++;
+            }
+         }
+
+         if (index < gaps.Length) {
+            var gapRemainingSpace = gaps[index];
+            while (gapRemainingSpace > 0) {
+               var blockToMove = blocks.LastOrDefault(t => t.id > index && !movedBlocks[t.id] && t.length <= gapRemainingSpace);
+               if (blockToMove == default) {
+                  currentPosition += gapRemainingSpace;
+                  gapRemainingSpace = 0;
+               }
+               else {
+                  movedBlocks[blockToMove.id] = true;
+                  gapRemainingSpace -= blockToMove.length;
+                  for (var blockItemIndex = 0; blockItemIndex < blockToMove.length; ++blockItemIndex) {
+                     checksum += currentPosition * blockToMove.id;
+                     currentPosition++;
+                  }
+               }
+            }
+         }
+      }
+
+      return $"{checksum}";
+   }
+
+   private void ParseInput(out (int length, int id)[] blocks, out int[] gaps) {
+      var input = GetInputText().Trim().Select((t, i) => (length: int.Parse($"{t}"), position: i)).ToArray();
+      blocks = input.Where(t => t.position % 2 == 0).Select(t => (t.length, id: t.position / 2)).ToArray();
+      gaps = input.Where(t => t.position % 2 == 1).Select(t => t.length).ToArray();
+   }
 }
