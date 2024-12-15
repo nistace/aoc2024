@@ -10,6 +10,8 @@ public class Vector2Int(int x, int y) : IEquatable<Vector2Int> {
    public int X { get; } = x;
    public int Y { get; } = y;
 
+   public Vector2Int[] FourNeighbours => [this + Left, this + Right, this + Up, this + Down];
+
    public static implicit operator Vector2Int((int x, int y) t) => new Vector2Int(t.x, t.y);
 
    public static Vector2Int operator +(Vector2Int a, Vector2Int b) => new Vector2Int(a.X + b.X, a.Y + b.Y);
