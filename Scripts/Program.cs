@@ -5,7 +5,7 @@ namespace AdventOfCode2024.Scripts;
 
 public static class Program {
    public static void Main() {
-      var day = new Day11();
+      var day = new Day12();
       Console.WriteLine($"{day.GetType().Name}:");
       Stopwatch stopwatch = new();
       stopwatch.Start();
