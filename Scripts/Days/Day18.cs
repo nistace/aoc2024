@@ -22,7 +22,7 @@ public class Day18 : AbstractDay {
       var closedNodesAndScores = new Dictionary<Vector2Int, long>();
       var openNodesAndScores = new Dictionary<Vector2Int, (long score, long heuristic)> { { start, (0, start.GridDistance(end)) } };
 
-      while (!closedNodesAndScores.ContainsKey(end)) {
+      while (!closedNodesAndScores.ContainsKey(end) && openNodesAndScores.Count > 0) {
          var next = openNodesAndScores.OrderBy(t => t.Value.heuristic).First();
 
          closedNodesAndScores.Add(next.Key, next.Value.score);
@@ -37,10 +37,28 @@ public class Day18 : AbstractDay {
          }
       }
 
-      return closedNodesAndScores[end];
+      return closedNodesAndScores.GetValueOrDefault(end, -1);
    }
 
-   public override string Part2() => "";
+   public override string Part2() {
+      ParseInput(out var fallingBytesCoordinates);
+      var dimensions = new Vector2Int(71, 71);
+      var maxNanosecondsReachable = 0;
+      var minNanosecondsUnreachable = fallingBytesCoordinates.Count - 1;
+
+      var surroundingWalls = GenerateSurroundingWalls(dimensions).ToArray();
+
+      while (maxNanosecondsReachable != minNanosecondsUnreachable - 1) {
+         var testNanoseconds = (maxNanosecondsReachable + minNanosecondsUnreachable) / 2;
+         var walls = surroundingWalls.Union(fallingBytesCoordinates.Take(testNanoseconds)).ToHashSet();
+         var testSteps = CountMinSteps((0, 0), dimensions - (1, 1), walls);
+         if (testSteps > -1) maxNanosecondsReachable = testNanoseconds;
+         else minNanosecondsUnreachable = testNanoseconds;
+      }
+
+      var firstBlockingCoordinates = fallingBytesCoordinates[minNanosecondsUnreachable - 1];
+      return $"{firstBlockingCoordinates.X},{firstBlockingCoordinates.Y}";
+   }
 
    private void ParseInput(out List<Vector2Int> fallingBytesCoordinates) {
       fallingBytesCoordinates = GetInputLines().Where(t => !string.IsNullOrEmpty(t)).Select(t => new Vector2Int(int.Parse(t.Split(",")[0]), int.Parse(t.Split(",")[1]))).ToList();
