@@ -30,4 +30,7 @@ public readonly struct Vector2Int(int x, int y) : IEquatable<Vector2Int> {
    public override int GetHashCode() => HashCode.Combine(X, Y);
 
    public override string ToString() => $"({X}, {Y})";
+
+   /// <summary> Gets the distance between this and the destination, considering movement happens horizontally and vertically only</summary>
+   public int GridDistance(Vector2Int destination) => Math.Abs(X - destination.X) + Math.Abs(Y - destination.Y);
 }
