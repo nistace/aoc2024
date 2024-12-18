@@ -9,15 +9,16 @@ public class Day13 : AbstractDay {
    private readonly Regex inputRegexPrize = new Regex(@"Prize: X=(\d+), Y=(\d+)");
    private const int PressACost = 3;
    private const int PressBCost = 1;
+   private const long Part2Offset = 10000000000000L;
 
    public override string Part1() {
       ParseInput(out var machineSetups);
-
       return $"{machineSetups.Select(t => t.Simulate()).Where(t => t.hasSolution).Sum(t => t.pressA * PressACost + t.pressB * PressBCost)}";
    }
 
    public override string Part2() {
-      return "";
+      ParseInput(out var machineSetups);
+      return $"{machineSetups.Select(t => t.Simulate(Part2Offset)).Where(t => t.hasSolution).Sum(t => t.pressA * PressACost + t.pressB * PressBCost)}";
    }
 
    private void ParseInput(out MachineSetup[] machineSetups) {
@@ -42,21 +43,21 @@ public class Day13 : AbstractDay {
       private Vector2Int ButtonBOffset { get; } = buttonsAndPrize[1];
       private Vector2Int PrizeLocation { get; } = buttonsAndPrize[2];
 
-      public (bool hasSolution, int pressA, int pressB) Simulate() {
+      public (bool hasSolution, long pressA, long pressB) Simulate(long offsetPrize = 0) {
          var ax = ButtonAOffset.X;
          var ay = ButtonAOffset.Y;
          var bx = ButtonBOffset.X;
          var by = ButtonBOffset.Y;
-         var px = PrizeLocation.X;
-         var py = PrizeLocation.Y;
+         var px = PrizeLocation.X + offsetPrize;
+         var py = PrizeLocation.Y + offsetPrize;
 
-         var pressB = (ax * py - px * ay) / (float)(ax * by - bx * ay);
-         if (pressB != (int)pressB) return (false, default, default);
+         var pressB = (ax * py - px * ay) / (double)(ax * by - bx * ay);
+         if (pressB != (long)pressB) return (false, default, default);
 
          var pressA = (px - pressB * bx) / ax;
-         if (pressA != (int)pressA) return (false, default, default);
+         if (pressA != (long)pressA) return (false, default, default);
 
-         return (true, (int)pressA, (int)pressB);
+         return (true, (long)pressA, (long)pressB);
       }
    }
 }
