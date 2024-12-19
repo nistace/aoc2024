@@ -10,17 +10,15 @@ public class Day19 : AbstractDay {
    }
 
    private static int CountDoableDesigns(List<string> desiredDesigns, HashSet<string> patterns) {
-      var possibleDesigns = patterns.ToHashSet();
       var impossibleDesigns = new HashSet<string>();
-      return desiredDesigns.Count(t => IsDesignPossible(t, possibleDesigns, impossibleDesigns));
+      return desiredDesigns.Count(t => IsDesignPossible(t, patterns, impossibleDesigns));
    }
 
-   private static bool IsDesignPossible(string design, HashSet<string> possibleDesigns, HashSet<string> impossibleDesigns) {
+   private static bool IsDesignPossible(string design, IReadOnlySet<string> possibleDesigns, HashSet<string> impossibleDesigns) {
       if (possibleDesigns.Contains(design)) return true;
       if (impossibleDesigns.Contains(design)) return false;
 
       if (possibleDesigns.Where(design.StartsWith).Any(possibleStart => IsDesignPossible(design[possibleStart.Length..], possibleDesigns, impossibleDesigns))) {
-         possibleDesigns.Add(design);
          return true;
       }
 
