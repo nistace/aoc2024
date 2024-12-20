@@ -5,21 +5,24 @@ namespace AdventOfCode2024.Scripts.Days;
 public class Day20 : AbstractDay {
    protected override int Day => 20;
 
-   public override string Part1() {
-      ParseInput(out var startPosition, out var endPosition, out var walls);
-      var costs = GetCostsFrom(startPosition, walls);
+	public override string Part1() {
+		ParseInput(out var startPosition, out var endPosition, out var walls);
+		var paths = GetPaths(startPosition, walls);
+		var cheats = GetCheats(walls, paths);
 
-      var countCheatsAbove100 =
-         (from cheatedWall in walls
-          select cheatedWall.FourNeighbours.Where(t => costs.ContainsKey(t)).ToArray()
-          into cheatedWallNeighbours
-          where cheatedWallNeighbours.Length >= 2
-          select 2 + cheatedWallNeighbours.Max(t => costs[t]) - cheatedWallNeighbours.Min(t => costs[t])).Count(cheatedCost => cheatedCost >= 100);
+		return $"{cheats.Count(t => t.Value >= 100)}";
+	}
+	
+	private static Dictionary<Vector2Int, int> GetCheats(HashSet<Vector2Int> walls, IReadOnlyDictionary<Vector2Int, int> costs) {
+		return (from cheatedWall in walls
+		        select (wall: cheatedWall, neighbouringPaths: cheatedWall.FourNeighbours.Where(costs.ContainsKey).ToArray())
+		        into cheat
+		        where cheat.neighbouringPaths.Length >= 2
+		        select (cheat.wall, savedCost: cheat.neighbouringPaths.Max(t => costs[t]) - cheat.neighbouringPaths.Min(t => costs[t]) - 2))
+			.ToDictionary(t => t.wall, t => t.savedCost);
+	}
 
-      return $"{countCheatsAbove100}";
-   }
-
-   private IReadOnlyDictionary<Vector2Int, int> GetCostsFrom(Vector2Int startPosition, HashSet<Vector2Int> walls) {
+   private IReadOnlyDictionary<Vector2Int, int> GetPaths(Vector2Int startPosition, HashSet<Vector2Int> walls) {
       var closedCosts = new Dictionary<Vector2Int, int>();
       var openCosts = new Dictionary<Vector2Int, int> { { startPosition, 0 } };
 
