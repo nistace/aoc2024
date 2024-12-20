@@ -7,23 +7,23 @@ public class Day20 : AbstractDay {
 
    public override string Part1() {
       ParseInput(out var startPosition, out var walls);
-      return $"{GetCheats(GetPaths(startPosition, walls), 2, 100).Count}";
+      return $"{GetCheats(GetPaths(startPosition, walls), 2, 100)}";
    }
 
    public override string Part2() {
       ParseInput(out var startPosition, out var walls);
-      return $"{GetCheats(GetPaths(startPosition, walls), 20, 100).Count}";
+      return $"{GetCheats(GetPaths(startPosition, walls), 20, 100)}";
    }
 
-   private static HashSet<(Vector2Int origin, Vector2Int destination)> GetCheats(IReadOnlyDictionary<Vector2Int, int> pathCosts, int allowedCheatDistance, int minCheatSavedCost) {
-      var cheats = new HashSet<(Vector2Int origin, Vector2Int destination)>();
+   private static int GetCheats(IReadOnlyDictionary<Vector2Int, int> pathCosts, int allowedCheatDistance, int minCheatSavedCost) {
+      var cheats = 0;
       foreach (var origin in pathCosts) {
          foreach (var destination in pathCosts) {
-            if (origin.Value >= destination.Value) continue;
+            if (destination.Value - origin.Value < minCheatSavedCost) continue;
             if (origin.Key.GridDistance(destination.Key) > allowedCheatDistance) continue;
             if (destination.Value - origin.Value - origin.Key.GridDistance(destination.Key) < minCheatSavedCost) continue;
 
-            cheats.Add((origin.Key, destination.Key));
+            cheats++;
          }
       }
       return cheats;
