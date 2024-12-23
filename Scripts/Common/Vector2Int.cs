@@ -19,6 +19,7 @@ public readonly struct Vector2Int(int x, int y) : IEquatable<Vector2Int> {
 
    public static Vector2Int operator +(Vector2Int a, Vector2Int b) => new Vector2Int(a.X + b.X, a.Y + b.Y);
    public static Vector2Int operator -(Vector2Int a, Vector2Int b) => new Vector2Int(a.X - b.X, a.Y - b.Y);
+   public static Vector2Int operator -(Vector2Int a) => new Vector2Int(-a.X, -a.Y);
    public static Vector2Int operator *(Vector2Int a, int scalar) => new Vector2Int(a.X * scalar, a.Y * scalar);
    public static Vector2Int operator *(int scalar, Vector2Int a) => a * scalar;
 
